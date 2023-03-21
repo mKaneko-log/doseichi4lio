@@ -1,0 +1,50 @@
+@charset "UTF-8";
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: monospace;
+}
+
+form {
+  width: 80%;
+  margin: 0 auto;
+}
+
+form h1 {
+  font-size: 1.5rem;
+  border-bottom: 1px dashed #c0c0c0;
+}
+form h1:not(:first-child) {
+  margin-top: 2rem;
+}
+
+form ul {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+ul > li {
+  list-style: none;
+}
+ul#list1 > li {
+  /***
+    display:flexで横並びの個数を固定して折り返す方法
+    https://1-notes.com/css-flexbox-fix-the-number/
+  ***/
+  width: calc(10% - 2px);
+  padding-bottom: .5rem;
+}
+ul#list2 > li {
+  width: calc(11% - 2px);
+}
+
+ul#list-result {
+  align-items: flex-end;
+}
+ul#list-result > li.res-node {
+  width: calc(8% - 2px);
+  font-size: 2rem;
+}

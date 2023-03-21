@@ -1,0 +1,9 @@
+a#backtoindex {
+    display: inline-block;
+    padding: .5rem 1rem;
+    border: 1px solid #000;
+    z-index: 1024;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}

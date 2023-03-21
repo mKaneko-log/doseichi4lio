@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * { margin: 0; padding: 0; }
+        .annotation { padding-left: .5rem; color: #999; font-size: .8rem; }
+        header { background: #90c0f0; padding: 1rem; }
+        nav { padding: 1rem .5rem; }
+        ul li { display: block; padding: .5rem; }
+        dl { border-left: 2px solid #90c0f0; padding: .5rem; }
+        dl dd { padding-left: 1rem; }
+        footer ul { display: flex; flex-wrap: wrap; }
+        footer > ul li:not(:first-child) { border-left: 1px dashed #90c0f0; }
+        footer > ul > li:not(:first-child) { display: inline-flex; align-items: center; }
+    </style>
+</head>
+<body>
+    <header><h1>ポートフォリオ</h1></header>
+    <nav><ul>
+        <li><dl>
+            <dt><a href="./_myprofile/">プロフィール</a></dt>
+            <dd>簡単な概略です。</dd>
+        </dl></li>
+        <li><dl>
+            <dt><a href="./lottery/">LOTO6ルーレット？</a></dt>
+            <dd>
+                <p>
+                    候補から外す数字を選べたり、結果内の奇数の数を選べたりします。<br>
+                    Vue.js使用の処女作です。
+                </p>
+                <p class="annotation">使用ライブラリ： Vue.js / umbrella.js / underscore.js / Mersenne Twister.js</p>
+            </dd>
+        </dl></li>
+        <li><dl>
+            <dt><a href="./todo/">TODOリスト</a></dt>
+            <dd>
+                <p>LocalStorageを利用して、履歴を削除しない限りデータが残り続けます。</p>
+                <p class="annotation">使用ライブラリ： primer.css / umbrella.js / underscore.js</p>
+            </dd>
+        </dl></li>
+        <li><dl>
+            <dt><a href="./contact/">お問い合わせフォーム</a></dt>
+            <dd>
+                <p>簡単なSPAもどきを目指して作成しました。</p>
+                <p class="annotation">使用ライブラリ： jQuery.js / Google Fonts</p>
+            </dd>
+        </dl></li>
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+    </ul></nav>
+    <footer><h1>補遺：ライブラリ</h1><ul>
+        <li>
+            MDN：開発者向けのウェブ技術
+            <ul>
+                <li><a href="https://developer.mozilla.org/ja/docs/Web">Index</a></li>
+                <li><a href="https://developer.mozilla.org/ja/docs/Web/HTML/Reference">HTML</a></li>
+                <li><a href="https://developer.mozilla.org/ja/docs/Web/CSS/Reference">CSS</a></li>
+                <li><a href="https://developer.mozilla.org/ja/docs/Web/JavaScript">JavaScript</a></li>
+                <li><a href="https://developer.mozilla.org/ja/docs/Web/API/Document_Object_Model">JS-DOM</a></li>
+            </ul>
+        </li>
+        <li><a href="https://ja.vuejs.org">Vue.js</a></li>
+        <li><a href="https://umbrellajs.com">umbrella.js</a></li>
+        <li><a href="https://underscorejs.org">underscore.js</a></li>
+        <li><a href="https://magicant.github.io/sjavascript/mt.html">Mersenne Twister.js</a></li>
+        <li><a href="https://primer.style/css/">primer.css</a></li>
+        <li><a href="https://primer.style/design/foundations/icons">Octicons</a></li>
+        <li><a href="https://jquery.com">jQuery.js</a></li>
+        <li><a href="https://fonts.google.com/?subset=japanese&noto.script=Jpan">Google Fonts</a></li>
+    </ul></footer>
+</body>
+</html>

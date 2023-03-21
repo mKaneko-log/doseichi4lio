@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
+    <title>ルーレット的な</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="js/vue.global.js"></script>
+    <script src="js/mt.js"></script>
+    <script src="js/underscore-umd.js"></script>
+    <script src="js/umbrella.min.js"></script>
+    <!--- 戻る追加 --->
+    <link rel="stylesheet" href="../_appendback.css">
+    <script src="../_appendback.js"></script>
+</head>
+<body>
+    <form id="form1">
+        <h1>削除数字選択</h1>
+        <ul id="list1">
+            <draw-checkbox v-for="check in checks" :chk="check"></draw-checkbox>
+        </ul>
+        <h1>総奇数数選択</h1>
+        <ul id="list2">
+            <draw-checkbox v-for="odd in odds" :chk="odd"></draw-checkbox>
+        </ul>
+        <div id="button1">
+            <button id="enter" type="submit">決定</button>
+        </div>
+        <hr>
+        <h1>結果</h1>
+        <div id="show-result">
+            <ul id="list-result"></ul>
+        </div>
+    </form>
+
+
+
+    <script>
+const CheckboxList = {
+    template: `<li><label><input type="checkbox" :value="chk.value" :name="chk.name">{{ chk.text }}</label></li>`,
+    props: ['chk']
+};
+
+const app = Vue.createApp({
+    components: { 'draw-checkbox': CheckboxList },
+    data() {
+        let v = [];
+        let o = [];
+        v.length = 43;
+        o.length = 7;
+        return {
+            checks: v.fill(1).map((v, i) => {
+                let r = v + i;
+                let t = (''+ r).padStart(2, '0');
+                return { value: r, text: t, id: i, name: 'delnum' }
+            }),
+            odds: o.fill(1).map((v, i) => {
+                return { value: i, text: i, id: i, name: 'odds' }
+            })
+        }
+    }
+});
+
+const $vm_form = app.mount('#form1');
+    </script>
+    <script src="index.js"></script>
+</body>
+</html>
