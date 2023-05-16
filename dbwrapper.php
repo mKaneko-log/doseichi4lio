@@ -3,7 +3,7 @@
 abstract class AbDBBase {
     abstract public function connect();
     abstract public function close();
-    abstract public function query($sql, $params = []);
+    abstract public function query($sql, $params = NULL);
 }
 trait ReadIniSetting {
     function read_ini(?string $section = NULL) {
@@ -40,15 +40,15 @@ trait MapStmt {
         return FALSE;
     }
     /**
-     * パラメータがストアドキーに"すべて"存在するか
+     * プリペアドキーがパラメータに"すべて"存在するか
      * 
-     * @param array $stmt_keys ストアドキー
+     * @param array $stmt_keys プリペアドキー
      * @param ?array $params パラメータ？
      */
     function isset_keys($stmt_keys, $params) {
         $result = [];
-        $key = '';
-        foreach($key as $params) { $result[] = array_key_exists($key, $stmt_keys); }
+        /** @var iterable|string $key */
+        foreach($key as $stmt_keys) { $result[] = array_key_exists($key, $params); }
         unset($key);
         return !in_array(FALSE, $result, TRUE);
     }
@@ -60,7 +60,7 @@ class WrapMySQL extends AbDBBase {
     private $dbconn = NULL;
     private $ini = [];
     function __construct(?string $section = NULL, bool $autoconnect = TRUE) {
-        $this->ini = read_ini($section);
+        $this->ini = $this->read_ini($section);
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         if($autoconnect) {
             $this->connect();
@@ -75,21 +75,100 @@ class WrapMySQL extends AbDBBase {
     function close() {
         mysqli_close($this->dbconn);
     }
+
+    private function replaceSqlParam(string &$sql, array $stmt, array $params) {
+        // [0: 'sid', 1: 'hoge', 2: 10, 3: 3.14] でshift()して「...$val」…みたいな？
+        $result = [];
+        $result[] = '';
+        $sql = preg_replace("/:[-\w]+/", '?', $sql);
+        /** @var iterable|string $key */
+        foreach($key as $stmt) {
+            $temp = $params[$key];
+            if(is_int($temp)) {
+                // 整数
+                $result[0] .= 'i';
+            } elseif(is_float($temp)) {
+                // 小数点あり
+                $result[0] .= 'd';
+            } else {
+                // 文字列
+                $result[0] .= 's';
+            }
+            $result[] = $temp;
+        }
+        unset($key);
+        return $result;
+    }
     function query($sql, $params = NULL) {
         $has_params = !(is_null($params) || (is_array($params) && count($params) == 0));
+        $result = [];
         try {
-            $stmt = preg_stmt($sql);
+            $stmt = $this->preg_stmt($sql);
             if($stmt === FALSE && !$has_params) {
                 // query
+                try {
+                    $q_result = $this->dbconn->query($sql);
+                    if(is_bool(($q_result))) {
+                        $result = $q_result? []: NULL;
+                    } else {
+                        while($row = $q_result->fetch_assoc()) { $result[] = $row; }
+                        unset($row);
+                    }
+                } catch(mysqli_sql_exception $q_err) {
+                    var_dump($q_err->getCode());
+                    var_dump($q_err->getMessage());
+                    throw $q_err;
+                } finally {
+                    $q_result->free();
+                }
             } else {
-                if(!isset_keys($stmt, $params)) { throw new Exception(); }
+                if(!$this->isset_keys($stmt, $params)) { throw new ArgumentCountError("パラメータ数がプリペアドステートメントと一致しません。"); }
                 // stmt
+                try {
+                    $prepared = $this->replaceSqlParam($sql, $stmt, $params);
+                    $v_types = array_shift($prepared);
+                    $q_stmt = new mysqli_stmt($this->dbconn, $sql);
+                    if(count($prepared) > 1) {
+                        // 複数
+                        $q_stmt->bind_param($v_types, ...$prepared);
+                    } else {
+                        // 単一
+                        $q_stmt->bind_param($v_types, $prepared);
+                    }
+                    $q_stmt->execute();
+                    $q_result = $q_stmt->get_result();
+                    if(!is_bool($q_result)) {
+                        // SELECT
+                        while($row = $q_result->fetch_assoc()) { $result[] = $row; }
+                        unset($row);
+                    } elseif($q_stmt->affected_rows > -1 && $this->dbconn->errno == 0) {
+                        // その他 (なにもしない)
+                        $result = [];
+                    } else {
+                        // エラー
+                        throw new mysqli_sql_exception("SQL実行（プリペアド）で何らかのエラー", 999);
+                    }
+                } catch(mysqli_sql_exception $s_err) {
+                    var_dump($s_err->getCode());
+                    var_dump($s_err->getMessage());
+                    throw $s_err;
+                } finally {
+                    if(isset($q_result)) { $q_result->free(); }
+                    $q_stmt->close();
+                }
             }
+
+            return $result;
+
         } catch(Exception $err) {
-            //
+            var_dump("= - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - =");
+            var_dump($err->getCode());
+            var_dump($err->getMessage());
+            throw $err;
         }
     }
 }
+
 
 class WrapPostgreSQL extends AbDBBase {
     use ReadIniSetting;
@@ -97,7 +176,7 @@ class WrapPostgreSQL extends AbDBBase {
     private $dbconn = NULL;
     private $ini = [];
     function __construct(?string $section = NULL, bool $autoconnect = TRUE) {
-        $this->ini = read_ini($section);
+        $this->ini = $this->read_ini($section);
         if($autoconnect) {
             $this->connect();
         }
@@ -114,7 +193,7 @@ class WrapPostgreSQL extends AbDBBase {
     function query($sql, $params = NULL) {
         $has_params = !(is_null($params) || (is_array($params) && count($params) == 0));
         try {
-            $stmt = preg_stmt($sql);
+            $stmt = $this->preg_stmt($sql);
             if($stmt === FALSE && !$has_params) {
                 // query
             } else {
