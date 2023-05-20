@@ -34,7 +34,7 @@ trait MapStmt {
             $match = [];
             $tmp = [];
             foreach($tmp as $result) { $match[] = $tmp[1]; }
-            unset($$tmp);
+            unset($tmp);
             return $match;
         }
         return FALSE;
@@ -192,15 +192,55 @@ class WrapPostgreSQL extends AbDBBase {
     }
     function query($sql, $params = NULL) {
         $has_params = !(is_null($params) || (is_array($params) && count($params) == 0));
+        $result = [];
         try {
             $stmt = $this->preg_stmt($sql);
             if($stmt === FALSE && !$has_params) {
                 // query
+                try {
+                    $q_result = pg_query($this->dbconn, $sql);
+                    if(!$q_result) { throw new Exception("SQL実行に失敗: ". pg_last_error()); }
+                    $q_status = pg_result_status(($q_result));
+                    if($q_status == PGSQL_BAD_RESPONSE || $q_status == PGSQL_NONFATAL_ERROR || $q_status == PGSQL_FATAL_ERROR) {
+                        throw new Exception("SQL実行中にエラー発生: ". pg_last_error());
+                    }
+                    if($q_status == PGSQL_TUPLES_OK) {
+                        /** @var array $row */
+                        while($row = pg_fetch_assoc($q_result)) { $result[] = $row; }
+                    }
+                } catch(Exception $q_err) {
+                    var_dump($q_err->getCode());
+                    var_dump($q_err->getMessage());
+                    throw $q_err;
+                } finally {
+                    if(isset($q_result)) { pg_free_result($q_result); }
+                }
             } else {
+                if(!$this->isset_keys($stmt, $params)) { throw new ArgumentCountError("パラメータ数がプリペアドステートメントと一致しません。"); }
                 // stmt
+                $s_params = [];
+                $pattern = '/:([-\w]+)/';
+                $count = 0;
+                $s_func = function(&$sql, $pattern, $params, &$output, &$i) {
+                    $flg = preg_match($pattern, $sql, $matches);
+                    if($flg == 0) { return FALSE; }
+                    $i++;
+                    $output[] = $params[$matches[1]];
+                    $sql = preg_replace($pattern, '*_*' . $i, $sql, 1);
+                    return TRUE;
+                };
+                while($s_func($sql, $pattern, $params, $s_params, $count)) {
+                    $sql = str_replace('*_*', '$', $sql);
+                }
             }
+
+            return $result;
+
         } catch(Exception $err) {
-            //
+            var_dump("= - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - =");
+            var_dump($err->getCode());
+            var_dump($err->getMessage());
+            throw $err;
         }
     }
 }
