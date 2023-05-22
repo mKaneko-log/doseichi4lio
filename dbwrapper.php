@@ -205,7 +205,7 @@ class WrapPostgreSQL extends AbDBBase {
                         throw new Exception("SQL実行中にエラー発生: ". pg_last_error());
                     }
                     if($q_status == PGSQL_TUPLES_OK) {
-                        /** @var array $row */
+                        // データ返り値がある
                         while($row = pg_fetch_assoc($q_result)) { $result[] = $row; }
                     }
                 } catch(Exception $q_err) {
@@ -229,8 +229,28 @@ class WrapPostgreSQL extends AbDBBase {
                     $sql = preg_replace($pattern, '*_*' . $i, $sql, 1);
                     return TRUE;
                 };
-                while($s_func($sql, $pattern, $params, $s_params, $count)) {
-                    $sql = str_replace('*_*', '$', $sql);
+
+                try {
+                    // パラメータもろもろ作成
+                    while($s_func($sql, $pattern, $params, $s_params, $count)) {
+                        $sql = str_replace('*_*', '$', $sql);
+                    }
+                    $s_result = pg_query_params($this->dbconn, $sql, $s_params);
+                    if(!$s_result) { throw new Exception("SQL実行に失敗: ". pg_last_error()); }
+                    $s_status = pg_result_status($s_result);
+                    if($s_status == PGSQL_BAD_RESPONSE || $s_status == PGSQL_NONFATAL_ERROR || $s_status == PGSQL_FATAL_ERROR) {
+                        throw new Exception("SQL実行中にエラー発生: ". pg_last_error());
+                    }
+                    if($s_status == PGSQL_TUPLES_OK) {
+                        // データ返り値がある
+                        while($row = pg_fetch_assoc($s_result)) { $result[] = $row; }
+                    }
+                } catch(Exception $s_err) {
+                    var_dump($s_err->getCode());
+                    var_dump($s_err->getMessage());
+                    throw $s_err;
+                } finally {
+                    if(isset($s_result)) { pg_free_result($s_result); }
                 }
             }
 
