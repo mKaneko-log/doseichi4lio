@@ -2,14 +2,29 @@
 
 .disabled { display: none; }
 
-body > main {
-    margin: 0 auto;
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+body > div {
+    position: relative;
     width: 800px;
+    height: 100vh;
+    margin: 0 auto;
 }
 
 main#login { padding-top: 20vh; }
+main#login > form {
+    display: flex;
+    justify-content: center;
+}
+main#login > form > label { padding-right: 1rem; }
 
-main#chatbase { padding: 2rem 0; }
+main#chatbase {
+    padding: 2rem 0;
+    overflow-y: auto;
+}
 main#chatbase ul#chatbase_text {
     margin: 0;
     padding: 0;
@@ -27,3 +42,19 @@ ul#chatbase_text li article h1 > code {
     font-size: .5rem;
     color: #999;
 }
+
+
+footer {
+    z-index: 10;
+    position: fixed;
+    bottom: 0;
+    width: inherit;
+    background: #fff;
+    padding: .5rem 0;
+    border-top: 1px dashed #000;
+}
+footer > form {
+    display: flex;
+    justify-content: space-around;
+}
+footer > form > input[type="text"] { width: 45rem; }

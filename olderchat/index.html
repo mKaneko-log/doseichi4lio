@@ -7,30 +7,43 @@
     <link rel="stylesheet" href="./_common/sanitize.css">
     <link rel="stylesheet" href="./_common/sanitize.css_forms.css">
     <link rel="stylesheet" href="./_common/index.css">
+    <script src="./_common/umbrella.min.js"></script>
     <script src="./_common/js.cookie.min.js"></script>
-    <script src="./_common/axios.min.js"></script>
 </head>
 <body>
-    <header class="disabled"></header>
-    <main id="login">
-        <form action="" id="login_form">
-            <label>
-                <span>なまえ：</span>
-                <input type="text" name="uname" value="" maxlength="20" placeholder="20文字以内">
-            </label>
-            <button type="submit">はいる</button>
-        </form>
-    </main>
-    <main id="chatbase">
-        <ul id="chatbase_text">
-            <li>
-                <article>
-                    <h1>名無しさん<code>2013/07/04 11:23:45</code></h1>
-                    <section>こんにちはこんにちは！</section>
-                </article>
-            </li>
-        </ul>
-    </main>
-    <footer class="disabled"></footer>
+    <div>
+        <main id="login" data-cog="login">
+            <form action="" id="login_form">
+                <label>
+                    <span>なまえ：</span>
+                    <input type="text" name="uname" value="" maxlength="20" placeholder="20文字以内" required>
+                </label>
+                <button type="submit">はいる</button>
+                <input type="hidden" name="status" value="login">
+            </form>
+        </main>
+        <main id="chatbase" data-cog="chatbase" class="disabled">
+            <ul id="chatbase_text">
+                <li>
+                    <article>
+                        <h1>名無しさん<code>2013/07/04 11:23:45</code></h1>
+                        <section>こんにちはこんにちは！</section>
+                    </article>
+                </li>
+            </ul>
+        </main>
+        <footer data-cog="chatbase" class="disabled">
+            <form action="" id="send_message">
+                <input type="text" name="message" value="" maxlength="200" placeholder="200文字以内">
+                <button type="submit">おくる</button>
+                <input type="hidden" name="status" value="send">
+            </form>
+            <form action="" id="logout">
+                <input type="hidden" name="status" value="logout">
+                <button type="submit">でる</button>
+            </form>
+        </footer>
+    </div>
+    <script src="./_common/index.js"></script>
 </body>
 </html>
